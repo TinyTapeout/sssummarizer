@@ -16,7 +16,7 @@ def summarize(cell_count):
     # print all used cells
     total = 0
     if args.print_summary:
-        print('| cell name | description | count |')
+        print('| Cell Name | Description | Count |')
         print('|-----------|-------------|-------|')
         for cell_name in cell_count:
             category = categories['map'][cell_name]
@@ -25,7 +25,7 @@ def summarize(cell_count):
                 cell_link = f'https://google/sky/{cell_name}'
                 print(f'| [{cell_link}]({cell_link}) | {defs[cell_name]["description"]} |{cell_count[cell_name]} |')
 
-        print(f'|Total | {total} |')
+        print(f'| | Total | {total} |')
 
     if args.print_category:
         by_category = {}
@@ -33,7 +33,7 @@ def summarize(cell_count):
             category = categories['map'][cell_name]
             by_category[category] = cell_count[cell_name]
 
-        print('| cell category | count |')
+        print('| Cell Category | Count |')
         print('|---------------|-------|')
         for index, cat_name in enumerate(categories['categories']):
             try:
