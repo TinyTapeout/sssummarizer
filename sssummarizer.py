@@ -8,8 +8,8 @@ import json
 
 # Print the summaries
 def summarize(cell_count):
-    with open('tags.json') as fh:
-        tags = json.load(fh)
+    with open('categories.json') as fh:
+        categories = json.load(fh)
     with open('defs.json') as fh:
         defs = json.load(fh)
 
@@ -19,7 +19,7 @@ def summarize(cell_count):
         print('| cell name | description | count |')
         print('|-----------|-------------|-------|')
         for cell_name in cell_count:
-            category = tags['map'][cell_name]
+            category = categories['map'][cell_name]
             if cell_count[cell_name] > 0:
                 total += cell_count[cell_name]
                 cell_link = f'https://google/sky/{cell_name}'
@@ -30,12 +30,12 @@ def summarize(cell_count):
     if args.print_category:
         by_category = {}
         for cell_name in cell_count:
-            category = tags['map'][cell_name]
+            category = categories['map'][cell_name]
             by_category[category] = cell_count[cell_name]
 
         print('| cell category | count |')
         print('|---------------|-------|')
-        for index, cat_name in enumerate(tags['categories']):
+        for index, cat_name in enumerate(categories['categories']):
             try:
                 print(f'|{cat_name} | {by_category[index]}|')
             except KeyError:
