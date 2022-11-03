@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 import glob
+import re
 import argparse
 import logging
 import os
 import sys
 import json
+
 
 def create_map(args):
     # replace this with a find
@@ -15,51 +17,38 @@ def create_map(args):
         with open(json_file) as fh:
             definitions.append(json.load(fh))
 
-    # only print a description that doesn't match any of these categories
-    # not any
-    tags = {}
-
-    with open('tags.json.backup') as fh:
-        first_run = json.load(fh)
-    
-    tags['categories'] = ['AND', 'OR', 'NAND', 'NOR', 'clock', 'flop', 'multiplexer', 'latch', 'inverter', 'buffer', 'Fill', 'Tap', 'diode', 'combologic', 'misc']
-    tags['map'] = {}
-    print(len(definitions))
-    for cell_count, d in enumerate(definitions):
-        print("-" * 20)
-        done = False
-        print(cell_count)
-        for num, cat in enumerate(tags['categories']):
-            print(f'{num} {cat}')
-        print()
-        print(f'{d["name"]} : {d["description"]}')
-        first_run_cat = first_run['map'][d['name']]
-        print(first_run_cat)
-        tags['map'][d['name']] = first_run_cat
-        while(done == False):
-            try:
-                num = int(input())
-            except ValueError as e:
-                done = True
-                break
-            print(tags['categories'][num])
-            ok = input("correct? y/n")
-            if ok == 'y':
-                tags['map'][d['name']] = num
-                done = True
-
-    with open("tags.json", 'w') as fh:
-        json.dump(tags, fh)
-
     with open(args.map_file, 'w') as fh:
         json.dump(definitions, fh)
 
+
+def get_tags():
+    with open('tags.json') as fh:
+        tags = json.load(fh)
+        return tags
+
+
+def get_cell_count_from_gl(args):
+    cell_count = {}
+    with open(args.gl) as fh:
+        for line in fh.readlines():
+            m = re.search('sky130_(\S+)__(\S+)', line)
+            if m is not None:
+                cell_lib = m.group(1)
+                cell_name = m.group(2)
+                assert cell_lib in ['fd_sc_hd', 'ef_sc_hd']
+                try:
+                    cell_count[cell_name] += 1
+                except KeyError:
+                    cell_count[cell_name] = 0
+    return(cell_count)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Efabless project tool")
 
     parser.add_argument('--create-map', help="create map file", action="store_const", const=True)
-    parser.add_argument('--map-file', help="map file")
+    parser.add_argument('--print-summary', help="print summary", action="store_const", const=True)
+    parser.add_argument('--map', help="map file")
+    parser.add_argument('--gl', help="gate level netlist")
     parser.add_argument('--debug', help="debug logging", action="store_const", dest="loglevel", const=logging.DEBUG, default=logging.INFO)
     args = parser.parse_args()
 
@@ -82,6 +71,8 @@ if __name__ == '__main__':
     # create map
     if args.create_map:
         create_map(args)
-
+    elif args.gl:
+        cell_count = get_cell_count_from_gl(args)
+        summarize(cell_count)
     else:
         parser.print_help()
