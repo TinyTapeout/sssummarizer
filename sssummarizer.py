@@ -30,55 +30,61 @@ def summarize(cell_count):
         defs = json.load(fh)
 
     # print all used cells
-    by_category = {}
     total = 0
-    print('| cell name | description | count |')
-    print('|-----------|-------------|-------|')
-    for cell_name in cell_count:
-        category = tags['map'][cell_name]
-        if cell_count[cell_name] > 0:
-            try:
-                by_category[category] = cell_count[cell_name]    
+    if args.print_summary:
+        print('| cell name | description | count |')
+        print('|-----------|-------------|-------|')
+        for cell_name in cell_count:
+            category = tags['map'][cell_name]
+            if cell_count[cell_name] > 0:
                 total += cell_count[cell_name]
+                cell_link = f'https://google/sky/{cell_name}'
+                print(f'| [{cell_link}]({cell_link}) | {defs[cell_name]["description"]} |{cell_count[cell_name]} |')
+
+        print(f'|Total | {total} |')
+
+    if args.print_category:
+        by_category = {}
+        for cell_name in cell_count:
+            category = tags['map'][cell_name]
+            by_category[category] = cell_count[cell_name]
+
+        print('| cell category | count |')
+        print('|---------------|-------|')
+        for index, cat_name in enumerate(tags['categories']):
+            try:
+                print(f'|{cat_name} | {by_category[index]}|')
             except KeyError:
-                by_category[category] = 0    
-            cell_link = f'https://google/sky/{cell_name}'
-            print(f'| [{cell_link}]({cell_link}) | {defs[cell_name]["description"]} |{cell_count[cell_name]} |')
-    
-    print('| cell category | count |')
-    print('|---------------|-------|')
-    for index, cat_name in enumerate(tags['categories']):
-        try:
-            print(f'|{cat_name} | {by_category[index]}|')
-        except KeyError:
-            pass
-        
-    print(f'|Total | {total} |')
+                pass
+
 
 def get_cell_count_from_gl(args):
     cell_count = {}
     total = 0
     with open(args.gl) as fh:
         for line in fh.readlines():
-            m = re.search('sky130_(\S+)__(\S+)_(\d+)', line)
+            m = re.search(r'sky130_(\S+)__(\S+)_(\d+)', line)
             if m is not None:
                 total += 1
                 cell_lib = m.group(1)
                 cell_name = m.group(2)
                 cell_drive = m.group(3)
                 assert cell_lib in ['fd_sc_hd', 'ef_sc_hd']
+                assert int(cell_drive) > 0
                 try:
                     cell_count[cell_name] += 1
                 except KeyError:
                     cell_count[cell_name] = 1
     logging.debug(f'total cells = {total}')
-    return(cell_count)
+    return (cell_count)
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Efabless project tool")
 
-    parser.add_argument('--create-defs', help="create def file", action="store_const", const=True)
-    parser.add_argument('--print-summary', help="print summary", action="store_const", const=True)
+    parser.add_argument('--create-defs', help="create def file", action="store_const", const=True, default=False)
+    parser.add_argument('--print-summary', help="print summary", action="store_const", const=True, default=False)
+    parser.add_argument('--print-category', help="print category", action="store_const", const=True, default=False)
     parser.add_argument('--gl', help="gate level netlist")
     parser.add_argument('--debug', help="debug logging", action="store_const", dest="loglevel", const=logging.DEBUG, default=logging.INFO)
     args = parser.parse_args()
