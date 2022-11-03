@@ -18,9 +18,14 @@ def create_map(args):
     # only print a description that doesn't match any of these categories
     # not any
     tags = {}
-    tags['categories'] = ['AND', 'OR', 'NAND', 'NOR', 'clock', 'flop', 'multiplexer', 'latch', 'inverter', 'buffer', 'Fill', 'Tap', 'diode']
+
+    with open('tags.json.backup') as fh:
+        first_run = json.load(fh)
+    
+    tags['categories'] = ['AND', 'OR', 'NAND', 'NOR', 'clock', 'flop', 'multiplexer', 'latch', 'inverter', 'buffer', 'Fill', 'Tap', 'diode', 'combologic', 'misc']
     tags['map'] = {}
-    for cell_count, d in enumerate(definitions[0:3]):
+    print(len(definitions))
+    for cell_count, d in enumerate(definitions):
         print("-" * 20)
         done = False
         print(cell_count)
@@ -28,8 +33,15 @@ def create_map(args):
             print(f'{num} {cat}')
         print()
         print(f'{d["name"]} : {d["description"]}')
+        first_run_cat = first_run['map'][d['name']]
+        print(first_run_cat)
+        tags['map'][d['name']] = first_run_cat
         while(done == False):
-            num = int(input())
+            try:
+                num = int(input())
+            except ValueError as e:
+                done = True
+                break
             print(tags['categories'][num])
             ok = input("correct? y/n")
             if ok == 'y':
