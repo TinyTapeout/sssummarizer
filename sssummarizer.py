@@ -32,6 +32,8 @@ def summarize(cell_count):
     # print all used cells
     by_category = {}
     total = 0
+    print('| cell name | description | count |')
+    print('|-----------|-------------|-------|')
     for cell_name in cell_count:
         category = tags['map'][cell_name]
         if cell_count[cell_name] > 0:
@@ -40,15 +42,18 @@ def summarize(cell_count):
                 total += cell_count[cell_name]
             except KeyError:
                 by_category[category] = 0    
-            print(cell_name, cell_count[cell_name], tags['categories'][category], defs[cell_name]['description'])
+            cell_link = f'https://google/sky/{cell_name}'
+            print(f'| [{cell_link}]({cell_link}) | {defs[cell_name]["description"]} |{cell_count[cell_name]} |')
     
+    print('| cell category | count |')
+    print('|---------------|-------|')
     for index, cat_name in enumerate(tags['categories']):
         try:
-            print(f'{cat_name} = {by_category[index]}')
+            print(f'|{cat_name} | {by_category[index]}|')
         except KeyError:
             pass
         
-    print(f'total {total}')
+    print(f'|Total | {total} |')
 
 def get_cell_count_from_gl(args):
     cell_count = {}
@@ -65,7 +70,7 @@ def get_cell_count_from_gl(args):
                 try:
                     cell_count[cell_name] += 1
                 except KeyError:
-                    cell_count[cell_name] = 0
+                    cell_count[cell_name] = 1
     logging.debug(f'total cells = {total}')
     return(cell_count)
 

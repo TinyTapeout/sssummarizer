@@ -9,8 +9,8 @@ gate level verilog netlist.
 
 prints a markdown table of cells, cell count. include description and link for each cell
 
-    sssummarizer --map mapfile --gl gate_level_verilog.v --print-summary
+    sssummarizer --gl gate_level_verilog.v --print-summary
 
 create the mapfile
 
-    sssummarizer --create-map repo_directory
+    sssummarizer --create-defs sky130_repo_directory
