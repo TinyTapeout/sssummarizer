@@ -6,24 +6,32 @@ import os
 import json
 
 
+CELL_URL = 'https://antmicro-skywater-pdk-docs.readthedocs.io/en/test-submodules-in-rtd/contents/libraries/sky130_fd_sc_ls/cells/'
+
+
 # Print the summaries
 def summarize(cell_count):
-    with open('categories.json') as fh:
+
+    script_dir = os.path.dirname(os.path.realpath(__file__))
+
+    with open(os.path.join(script_dir, 'categories.json')) as fh:
         categories = json.load(fh)
-    with open('defs.json') as fh:
+    with open(os.path.join(script_dir, 'defs.json')) as fh:
         defs = json.load(fh)
 
     # print all used cells
     total = 0
     if args.print_summary:
+        print('# Cell usage')
+        print()
         print('| Cell Name | Description | Count |')
         print('|-----------|-------------|-------|')
         for cell_name in cell_count:
             category = categories['map'][cell_name]
             if cell_count[cell_name] > 0:
                 total += cell_count[cell_name]
-                cell_link = f'https://google/sky/{cell_name}'
-                print(f'| [{cell_link}]({cell_link}) | {defs[cell_name]["description"]} |{cell_count[cell_name]} |')
+                cell_link = f'{CELL_URL}{cell_name}'
+                print(f'| [{cell_name}]({cell_link}) | {defs[cell_name]["description"]} |{cell_count[cell_name]} |')
 
         print(f'| | Total | {total} |')
 
@@ -33,6 +41,8 @@ def summarize(cell_count):
             category = categories['map'][cell_name]
             by_category[category] = cell_count[cell_name]
 
+        print('# Cell usage by Category')
+        print()
         print('| Cell Category | Count |')
         print('|---------------|-------|')
         for index, cat_name in enumerate(categories['categories']):
@@ -85,9 +95,6 @@ if __name__ == '__main__':
     parser.add_argument('--print-category', help="print category", action="store_const", const=True, default=False)
     parser.add_argument('--gl', help="gate level netlist")
     args = parser.parse_args()
-
-    # change directory to the script's path, to have access to json files
-    os.chdir((os.path.dirname(os.path.realpath(__file__))))
 
     # create map
     if args.create_defs:
